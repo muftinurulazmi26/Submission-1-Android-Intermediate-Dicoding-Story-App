@@ -19,6 +19,9 @@ import dev.mufadev.storyapp.view.ViewModelFactory
 import dev.mufadev.storyapp.view.custom.CustomDialog
 import dev.mufadev.storyapp.view.login.LoginActivity
 import dev.mufadev.storyapp.view.login.LoginViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
@@ -62,17 +65,22 @@ class MainActivity : AppCompatActivity() {
         storyAdapter = StoryAdapter()
         dialog_loader = CustomDialog(this)
 
-        mainViewModel.storyRepository.loading.observe(this) {
-            if (it) showLoading() else hideLoading()
+        mainViewModel.getToken().observe(this){
+            CoroutineScope(Dispatchers.IO).launch {
+                mainViewModel.getStories()
+            }
+
+            mainViewModel.storyRepository.loading.observe(this) {
+                if (it) showLoading() else hideLoading()
+            }
+            mainViewModel.storyRepository.stories.observe(this) {
+                storyAdapter.setData(it as ArrayList<Story>)
+                if (it.isEmpty()) Toast.makeText(this@MainActivity, "No Data", Toast.LENGTH_SHORT).show()
+            }
+            mainViewModel.storyRepository.error_message.observe(this){
+                Toast.makeText(this@MainActivity, it, Toast.LENGTH_SHORT).show()
+            }
         }
-        mainViewModel.storyRepository.stories.observe(this) {
-            storyAdapter.setData(it as ArrayList<Story>)
-            if (it.isEmpty()) Toast.makeText(this@MainActivity, "No Data", Toast.LENGTH_SHORT).show()
-        }
-        mainViewModel.storyRepository.error_message.observe(this){
-            Toast.makeText(this@MainActivity, it, Toast.LENGTH_SHORT).show()
-        }
-        mainViewModel.getStories()
 
         with(binding.rvStory){
             setHasFixedSize(true)

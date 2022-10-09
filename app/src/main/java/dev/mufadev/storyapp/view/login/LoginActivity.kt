@@ -63,6 +63,7 @@ class LoginActivity : AppCompatActivity() {
             if (user.isLogin){
                 val intent = Intent(this@LoginActivity, MainActivity::class.java)
                 startActivity(intent)
+                finish()
             }
         }
         loginViewModel.loading.observe(this) {
@@ -78,8 +79,6 @@ class LoginActivity : AppCompatActivity() {
                 val token = loginResult.get("token") as String
                 loginViewModel.saveUser(UserModel(userId, name, token))
                 loginViewModel.login()
-                val intent = Intent(this@LoginActivity, MainActivity::class.java)
-                startActivity(intent)
             }
         }
         loginViewModel.error_message.observe(this){
