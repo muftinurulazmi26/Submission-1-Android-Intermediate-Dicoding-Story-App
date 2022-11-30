@@ -29,7 +29,7 @@ class StoryRepository(private val pref: UserPreference) {
                 ) {
                     _loading.value = false
                     if (response.isSuccessful){
-                        _stories.postValue(response.body()?.listStory as MutableList<Story>?)
+                        _stories.value = response.body()?.listStory as ArrayList<Story>
                     }
                 }
 
